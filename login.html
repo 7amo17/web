@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #000;
+      color: #0f0;
+      text-align: center;
+      padding: 50px 20px;
+    }
+    input, button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 80%;
+      border-radius: 10px;
+      border: 2px solid #0f0;
+      background: #111;
+      color: #0f0;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+    a {
+      color: #0f0;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h2>تسجيل الدخول</h2>
+  <input type="text" id="username" placeholder="اسم المستخدم أو رقم الهاتف">
+  <input type="password" id="password" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+  <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب</a></p>
+
+  <script>
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      if (username === 'hamo' && password === '20534772') {
+        localStorage.setItem('admin', 'true');
+        window.location.href = 'admin.html';
+        return;
+      }
+
+      const clients = JSON.parse(localStorage.getItem('clients')) || [];
+      const user = clients.find(c => (c.phone === username || c.username === username) && c.password === password);
+
+      if (user) {
+        localStorage.setItem('currentClient', JSON.stringify(user));
+        window.location.href = 'services.html';
+      } else {
+        alert('بيانات الدخول غير صحيحة');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة تحكم الأدمن</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #000;
+      color: #0f0;
+      padding: 20px;
+    }
+    .section {
+      border: 2px solid #0f0;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 15px;
+      background: #111;
+    }
+    input, button, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #0f0;
+      background: #111;
+      color: #0f0;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+    .list-item {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px dashed #0f0;
+    }
+    .list-item img {
+      margin-top: 5px;
+      max-width: 100px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h2>لوحة تحكم الأدمن</h2>  <div class="section">
+    <h3>➕ إضافة قسم جديد</h3>
+    <input type="text" id="categoryName" placeholder="اسم القسم">
+    <input type="text" id="categoryImage" placeholder="رابط صورة القسم">
+    <button onclick="addCategory()">إضافة</button>
+  </div>  <div class="section">
+    <h3>🛠️ إدارة الأقسام</h3>
+    <ul id="categoryList"></ul>
+  </div>  <div class="section">
+    <h3>➕ إضافة خدمة جديدة</h3>
+    <select id="serviceCategory"></select>
+    <input type="text" id="serviceName" placeholder="اسم الخدمة">
+    <input type="number" id="servicePrice" placeholder="السعر">
+    <input type="text" id="serviceLink" placeholder="رابط الخدمة (اختياري)">
+    <button onclick="addService()">إضافة الخدمة</button>
+    <ul id="serviceList"></ul>
+  </div>  <div class="section">
+    <h3>➕ إضافة عميل جديد</h3>
+    <input type="text" id="clientUsername" placeholder="اسم المستخدم">
+    <input type="text" id="clientPhone" placeholder="رقم الهاتف">
+    <input type="text" id="clientPassword" placeholder="كلمة المرور">
+    <button onclick="addClient()">إضافة عميل</button>
+    <ul id="clientList"></ul>
+  </div>  <div class="section">
+    <h3>📁 إدارة الطلبات والعملاء</h3>
+    <button onclick="location.href='clients.html'">👤 العملاء</button>
+    <button onclick="location.href='orders.html'">📦 الطلبات</button>
+  </div>  <script>
+    let categories = JSON.parse(localStorage.getItem('categories')) || [];
+    let services = JSON.parse(localStorage.getItem('services')) || [];
+    let clients = JSON.parse(localStorage.getItem('clients')) || [];
+
+    function saveData() {
+      localStorage.setItem('categories', JSON.stringify(categories));
+      localStorage.setItem('services', JSON.stringify(services));
+      localStorage.setItem('clients', JSON.stringify(clients));
+    }
+
+    function saveAndReload() {
+      saveData();
+      location.reload();
+    }
+
+    function addCategory() {
+      const name = document.getElementById('categoryName').value;
+      const img = document.getElementById('categoryImage').value;
+      if (!name) return alert('أدخل اسم القسم');
+      categories.push({ name, img });
+      saveAndReload();
+    }
+
+    function deleteCategory(index) {
+      if (confirm('هل تريد حذف هذا القسم؟')) {
+        categories.splice(index, 1);
+        saveAndReload();
+      }
+    }
+
+    function addService() {
+      const name = document.getElementById('serviceName').value;
+      const category = document.getElementById('serviceCategory').value;
+      const price = document.getElementById('servicePrice').value;
+      const link = document.getElementById('serviceLink').value;
+      if (!name || !price) return alert('يرجى إدخال اسم الخدمة والسعر');
+      services.push({ name, price, category, link });
+      saveAndReload();
+    }
+
+    function deleteService(index) {
+      if (confirm('هل تريد حذف هذه الخدمة؟')) {
+        services.splice(index, 1);
+        saveAndReload();
+      }
+    }
+
+    function addClient() {
+      const username = document.getElementById('clientUsername').value;
+      const phone = document.getElementById('clientPhone').value;
+      const password = document.getElementById('clientPassword').value;
+      if (!username || !phone || !password) return alert('يرجى إدخال جميع الحقول');
+      clients.push({ username, phone, password });
+      saveAndReload();
+    }
+
+    function deleteClient(index) {
+      if (confirm('هل تريد حذف هذا العميل؟')) {
+        clients.splice(index, 1);
+        saveAndReload();
+      }
+    }
+
+    function loadCategories() {
+      const serviceCategory = document.getElementById('serviceCategory');
+      const catList = document.getElementById('categoryList');
+      serviceCategory.innerHTML = '';
+      catList.innerHTML = '';
+      categories.forEach((cat, index) => {
+        const opt = document.createElement('option');
+        opt.value = cat.name;
+        opt.textContent = cat.name;
+        serviceCategory.appendChild(opt);
+
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<strong>${cat.name}</strong><br><img src="${cat.img}" /><br><button onclick="deleteCategory(${index})">🗑 حذف</button>`;
+        catList.appendChild(li);
+      });
+    }
+
+    function loadServices() {
+      const list = document.getElementById('serviceList');
+      list.innerHTML = '';
+      services.forEach((srv, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<strong>${srv.name}</strong><br>الفئة: ${srv.category}<br>السعر: ${srv.price} جنيه<br><a href="${srv.link}" target="_blank">الرابط</a><br><button onclick="deleteService(${index})">🗑 حذف</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    function loadClients() {
+      const list = document.getElementById('clientList');
+      list.innerHTML = '';
+      clients.forEach((cl, index) => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.innerHTML = `<strong>${cl.username}</strong><br>📞 ${cl.phone}<br>🔐 ${cl.password}<br><button onclick="deleteClient(${index})">🗑 حذف</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    loadCategories();
+    loadServices();
+    loadClients();
+  </script></body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>اختيار الخدمة</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #000;
+      color: #0f0;
+      padding: 20px;
+    }
+    .section {
+      border: 2px solid #0f0;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 15px;
+      background: #111;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #0f0;
+      background: #111;
+      color: #0f0;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>اختر القسم والخدمة</h2>
+
+  <div class="section">
+    <label for="categorySelect">اختر القسم:</label>
+    <select id="categorySelect" onchange="loadServices()"></select>
+
+    <label for="serviceSelect">اختر الخدمة:</label>
+    <select id="serviceSelect"></select>
+
+    <label for="quantity">الكمية:</label>
+    <input type="number" id="quantity" min="1" placeholder="العدد المطلوب">
+
+    <button onclick="placeOrder()">اطلب الآن</button>
+  </div>
+
+  <script>
+    const telegramToken = '7903542020:AAG-Kv90O7Un3E_G8VdYsyYG19SW9B2_ttY';
+    const telegramChatId = '8047097446';
+
+    const categories = JSON.parse(localStorage.getItem('categories')) || [];
+    const services = JSON.parse(localStorage.getItem('services')) || [];
+
+    const categorySelect = document.getElementById('categorySelect');
+    const serviceSelect = document.getElementById('serviceSelect');
+
+    function loadCategories() {
+      categorySelect.innerHTML = '';
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.name;
+        option.textContent = cat.name;
+        categorySelect.appendChild(option);
+      });
+      loadServices();
+    }
+
+    function loadServices() {
+      const selectedCategory = categorySelect.value;
+      const filteredServices = services.filter(s => s.category === selectedCategory);
+      serviceSelect.innerHTML = '';
+      filteredServices.forEach(s => {
+        const option = document.createElement('option');
+        option.value = JSON.stringify(s);
+        option.textContent = `${s.name} - ${s.price} جنيه`;
+        serviceSelect.appendChild(option);
+      });
+    }
+
+    function placeOrder() {
+      const selectedService = JSON.parse(serviceSelect.value);
+      const quantity = document.getElementById('quantity').value;
+      const client = JSON.parse(localStorage.getItem('currentClient'));
+
+      if (!quantity || quantity < 1) return alert('يرجى إدخال الكمية المطلوبة');
+
+      const message = `\n🔔 طلب جديد:\n👤 العميل: ${client.username}\n📱 رقم الهاتف: ${client.phone}\n📦 الخدمة: ${selectedService.name}\n🧩 القسم: ${selectedService.category}\n📌 الكمية: ${quantity}\n💰 السعر: ${selectedService.price} جنيه`;
+
+      fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: telegramChatId, text: message })
+      });
+
+      alert('تم إرسال الطلب بنجاح');
+    }
+
+    loadCategories();
+  </script>
+</body>
+</html>
